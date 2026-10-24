@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Free Geo Grid Tracker</title>
+  <link rel="stylesheet" href="lib/leaflet.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Free Geo Grid Tracker <small class="by">by <a data-brand-link href="#" target="_blank" rel="noreferrer"><span data-brand-name></span></a></small></h1>
+    <nav>
+      <button class="tab active" data-view="scan">New scan</button>
+      <button class="tab" data-view="history">History</button>
+    </nav>
+  </header>
+
+  <main id="view-scan" class="layout">
+    <section class="panel config">
+      <section class="step">
+        <h3><span class="num">1</span>What do you want to rank for?</h3>
+        <label>Keyword
+          <input id="keyword" placeholder="e.g. website designer">
+        </label>
+      </section>
+
+      <section class="step">
+        <h3><span class="num">2</span>Which business are you tracking?</h3>
+        <label>Business name
+          <input id="bizName" placeholder="e.g. Ksoft Solutions">
+        </label>
+        <label>Google Maps link, Place ID or CID <span class="opt">(recommended)</span>
+          <input id="bizLink" placeholder="Paste the Maps URL, ChIJ… Place ID or 0x…:0x… id">
+        </label>
+        <div id="bizInfo" class="note">Paste a link or ID and the business name, exact match and location are filled in automatically.</div>
+      </section>
+
+      <section class="step">
+        <h3><span class="num">3</span>Where should the grid be centered?</h3>
+        <div class="seg" id="centreSeg">
+          <button type="button" data-src="business">Business</button>
+          <button type="button" data-src="search">Search place</button>
+          <button type="button" data-src="mine">My location</button>
+          <button type="button" data-src="manual">Map / coords</button>
+        </div>
+        <div class="src-panel" data-panel="business">Uses the location of the business from step 2. Great when the client is in another city.</div>
+        <div class="src-panel" data-panel="search" hidden>
+          <div class="row">
+            <input id="addr" placeholder="City, area or address…">
+            <button id="addrBtn" type="button" class="flex0">Search</button>
+          </div>
+          <div id="addrResults" class="results"></div>
+        </div>
+        <div class="src-panel" data-panel="mine" hidden>
+          <button id="useMine" type="button">Detect my location</button>
+          <div id="mineMsg" class="note"></div>
+        </div>
+        <div class="src-panel" data-panel="manual" hidden>Click anywhere on the map, or type the coordinates below.</div>
+        <div class="row">
+          <input id="lat" placeholder="Latitude" inputmode="decimal" aria-label="Latitude">
+          <input id="lng" placeholder="Longitude" inputmode="decimal" aria-label="Longitude">
+        </div>
+        <div id="centreLabel" class="centre-label">Center not set yet</div>
+      </section>
+
+      <section class="step">
+        <h3><span class="num">4</span>Grid size and spacing</h3>
+        <div class="row">
+          <label>Grid
+            <select id="size">
+              <option value="3">3×3 (9 pins)</option>
+              <option value="5">5×5 (25 pins)</option>
+            </select>
+          </label>
+          <label>Distance between pins
+            <div class="row tight">
+              <input id="dist" type="number" min="1" step="any" value="1">
+              <select id="unit">
+                <option value="km">km</option>
+                <option value="m">meters</option>
+                <option value="mi">miles</option>
+              </select>
+            </div>
+          </label>
+        </div>
+        <details>
+          <summary>Advanced</summary>
+          <div class="row">
+            <label>Results depth
+              <select id="depth"><option>10</option><option selected>20</option><option>30</option><option>40</option></select>
+            </label>
+            <label>Map zoom
+              <input id="zoom" type="number" min="10" max="20" value="15">
+            </label>
+          </div>
+          <div class="row">
+            <label>Language (hl)
+              <input id="hl" value="en">
+            </label>
+            <label>Country (gl)
+              <input id="gl" value="in" maxlength="2">
+            </label>
+          </div>
+          <div class="row">
+            <label>Min delay (s)
+              <input id="delayMin" type="number" min="1" value="3">
+            </label>
+            <label>Max delay (s)
+              <input id="delayMax" type="number" min="1" value="7">
+            </label>
+          </div>
+        </details>
+      </section>
+
+      <section class="step last">
+        <h3><span class="num go">5</span>Run it</h3>
+        <div id="estimate" class="hint"></div>
+        <div class="row">
+          <button id="start" class="primary big" type="button">Start scan</button>
+          <button id="stop" type="button" class="flex0" disabled>Stop</button>
+        </div>
+      </section>
+    </section>
+
+    <section class="results-col">
+      <div class="cards">
+        <div class="card"><span>ARP</span><b id="mArp">–</b></div>
+        <div class="card"><span>ATRP</span><b id="mAtrp">–</b></div>
+        <div class="card"><span>SoLV</span><b id="mSolv">–</b></div>
+        <div class="card"><span>Pins found</span><b id="mFound">–</b></div>
+        <div class="card actions">
+          <button id="exportCsv" type="button" disabled>Export CSV</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="progress"><div id="bar"></div></div>
+        <div id="status" class="status">Fill in steps 1–4, then press Start scan.</div>
+        <div id="alert" class="alert" hidden>
+          <span id="alertText"></span>
+          <button id="resume" type="button" class="primary">Resume</button>
+        </div>
+
+        <div id="cta" class="cta" hidden>
+          <span id="ctaText"></span>
+          <a id="ctaBtn" class="btn-link" href="#" target="_blank" rel="noreferrer"></a>
+        </div>
+
+        <div class="map-wrap">
+          <div id="map"></div>
+          <aside id="detail" class="detail"></aside>
+        </div>
+        <div class="legend">
+          <span><i style="background:#22c55e"></i>1–3 <b id="b0">0</b></span>
+          <span><i style="background:#eab308"></i>4–10 <b id="b1">0</b></span>
+          <span><i style="background:#f97316"></i>11–15 <b id="b2">0</b></span>
+          <span><i style="background:#ef4444"></i>16+ / not found <b id="b3">0</b></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="view-history" class="history" hidden>
+    <div class="panel">
+      <h2>Saved scans</h2>
+      <div id="historyList"></div>
+    </div>
+  </main>
+
+  <footer class="foot">Powered by <a data-brand-link href="#" target="_blank" rel="noreferrer"><span data-brand-name></span></a></footer>
+
+  <div id="leadModal" class="modal" hidden>
+    <form id="leadForm" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadTitle" novalidate>
+      <h2 id="leadTitle"></h2>
+      <p id="leadText" class="hint"></p>
+      <label>Email
+        <input id="leadEmail" type="email" autocomplete="email" placeholder="you@agency.com">
+      </label>
+      <div class="row">
+        <label>Name <span class="opt">(optional)</span>
+          <input id="leadName" autocomplete="name">
+        </label>
+        <label>Website <span class="opt">(optional)</span>
+          <input id="leadWebsite" placeholder="youragency.com">
+        </label>
+      </div>
+      <input id="leadHp" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label class="check"><input type="checkbox" id="leadConsent">
+        <span>I agree to receive emails from <span data-brand-name></span> and accept the <a id="leadPrivacy" href="#" target="_blank" rel="noreferrer">privacy policy</a>.</span>
+      </label>
+      <div id="leadErr" class="note err"></div>
+      <div class="row">
+        <button id="leadSubmit" type="submit" class="primary">Submit</button>
+        <button id="leadSkip" type="button">Maybe later</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="lib/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

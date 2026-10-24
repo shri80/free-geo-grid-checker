@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Free Geo Grid Tracker",
+  "version": "0.1.0",
+  "description": "Check local Google Maps rankings of a business across a grid of coordinates.",
+  "permissions": ["storage", "unlimitedStorage", "tabs", "scripting", "geolocation"],
+  "host_permissions": [
+    "https://*.google.com/*",
+    "https://*.google.co.in/*",
+    "https://nominatim.openstreetmap.org/*",
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Free Geo Grid Tracker" }
+}
