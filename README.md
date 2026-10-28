@@ -38,5 +38,3 @@ Free Chrome extension (Manifest V3) that checks where a business ranks in local 
 - Page-reading selectors live in `js/scraper.js`; update them there if the page markup changes.
 - `js/grid.js` holds the pure logic (grid math, parsing, matching, metrics, CSV).
 
-## Branding
-- A "Try GMB Briefcase" banner appears after every completed scan and a "Powered by" footer is always shown. Brand text and links live in `js/config.js`.
