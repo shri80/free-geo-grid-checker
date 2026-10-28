@@ -4,6 +4,8 @@
 
 Free Chrome extension (Manifest V3) that checks where a business ranks in local Maps search results across a grid of locations.
 
+# How to use video https://www.loom.com/share/0c17b9d1e6fe4a559d8acb3ec50e0455
+
 ## Features
 - 3×3 (9 pins) and 5×5 (25 pins) grids with adjustable spacing (km, meters or miles).
 - Results depth of 10, 20, 30 or 40 listings per pin.
