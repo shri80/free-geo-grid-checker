@@ -4,7 +4,6 @@ import {
 } from './grid.js';
 import { scrapeMapsResults, readPlacePage } from './scraper.js';
 import { BRAND } from './config.js';
-import * as lead from './lead.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELDS = ['keyword', 'bizName', 'bizLink', 'lat', 'lng', 'size', 'dist', 'unit', 'depth', 'zoom', 'hl', 'gl', 'delayMin', 'delayMax'];
@@ -239,7 +238,7 @@ function selectPin(index) {
 
   if (p.url) {
     const a = document.createElement('a');
-    a.href = p.url; a.target = '_blank'; a.rel = 'noreferrer'; a.textContent = 'Open this search in Google Maps';
+    a.href = p.url; a.target = '_blank'; a.rel = 'noreferrer'; a.className = 'open-link'; a.textContent = 'Open this search in Google Maps ↗';
     const wrap = document.createElement('div');
     wrap.className = 'hint';
     wrap.append(a);
@@ -504,47 +503,17 @@ async function startScan() {
   else setStatus(`Done. ARP ${m.arp == null ? '–' : m.arp.toFixed(1)}, SoLV ${Math.round(m.solv ?? 0)}%. Click a pin to see the full list.`);
 }
 
-// ---------- branding and lead capture ----------
+// ---------- branding ----------
 function applyBrand() {
   document.querySelectorAll('[data-brand-name]').forEach((el) => { el.textContent = BRAND.name; });
   document.querySelectorAll('[data-brand-link]').forEach((el) => { el.href = BRAND.url; });
   $('ctaText').textContent = BRAND.ctaText;
   $('ctaBtn').textContent = BRAND.ctaButton;
   $('ctaBtn').href = BRAND.url;
-  $('leadTitle').textContent = BRAND.promptTitle;
-  $('leadText').textContent = BRAND.promptText;
-  $('leadPrivacy').href = BRAND.privacyUrl;
 }
 
-function openLeadModal() {
-  $('leadErr').textContent = '';
-  $('leadModal').hidden = false;
-  $('leadEmail').focus();
-}
-
-async function afterCompletedScan() {
+function afterCompletedScan() {
   $('cta').hidden = false;
-  const s = await lead.recordScan(store);
-  if (lead.shouldPrompt(s)) openLeadModal();
-}
-
-function initLead() {
-  applyBrand();
-  lead.flushPending(store).catch(() => {});
-  $('leadForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const res = await lead.submitLead(store, {
-      email: $('leadEmail').value,
-      name: $('leadName').value,
-      website: $('leadWebsite').value,
-      consent: $('leadConsent').checked,
-      honeypot: $('leadHp').value,
-    }, { version: chrome.runtime.getManifest().version });
-    if (!res.ok) { $('leadErr').textContent = res.error; return; }
-    $('leadModal').hidden = true;
-    setStatus('Thanks! You are all set.');
-  };
-  $('leadSkip').onclick = async () => { await lead.skipPrompt(store); $('leadModal').hidden = true; };
 }
 
 function setRunning(on) {
@@ -622,6 +591,38 @@ function showView(name) {
   else map.invalidateSize();
 }
 
+function clearAll() {
+  if (state.running) { setStatus('Stop the scan before clearing.'); return; }
+  clearTimeout(lookupTimer);
+  state.lookupSeq++;
+  FIELDS.forEach((f) => {
+    const el = $(f);
+    if (el.tagName === 'SELECT') el.selectedIndex = Math.max(0, [...el.options].findIndex((o) => o.defaultSelected));
+    else el.value = el.defaultValue;
+  });
+  $('addr').value = '';
+  $('addrResults').replaceChildren();
+  $('mineMsg').textContent = '';
+  state.nameAuto = false;
+  state.lookingUp = false;
+  state.scan = null;
+  state.pins = [];
+  state.target = { name: '', fid: '', placeId: '', lat: null, lng: null };
+  $('centreLabel').dataset.label = '';
+  setSource('business');
+  renderCentreLabel();
+  parseBusiness();
+  resetDetail();
+  drawPins();
+  updateMetrics();
+  updateEstimate();
+  $('alert').hidden = true;
+  $('cta').hidden = true;
+  setStatus('Fill in steps 1–4, then press Start scan.');
+  map.setView([20.5937, 78.9629], 5);
+  saveSettings();
+}
+
 // ---------- wiring ----------
 async function init() {
   initMap();
@@ -644,11 +645,12 @@ async function init() {
   $('addrBtn').onclick = searchAddress;
   $('addr').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchAddress(); });
   $('useMine').onclick = useMyLocation;
+  $('clearAll').onclick = clearAll;
   $('start').onclick = startScan;
   $('stop').onclick = stopScan;
   $('resume').onclick = () => state.resumeResolve?.();
   $('exportCsv').onclick = exportCsv;
-  initLead();
+  applyBrand();
   previewGrid(true);
   updateEstimate();
   updateMetrics();

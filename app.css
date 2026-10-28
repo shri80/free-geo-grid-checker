@@ -39,6 +39,11 @@ button:hover:not(:disabled) { border-color: var(--brand); }
 button:disabled { opacity: .5; cursor: default; }
 button.primary { background: var(--brand); color: var(--brand-text); border-color: var(--brand); }
 
+.clear-btn { float: right; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.clear-btn:hover:not(:disabled) { color: var(--text); }
+.detail a.open-link { display: inline-block; padding: 6px 12px; margin-bottom: 4px; background: var(--brand); color: #fff; border: 1px solid #fff; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; }
+.detail a.open-link:hover { filter: brightness(1.15); }
+
 .hint { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
 .results { margin-bottom: 8px; }
 .results button { display: block; width: 100%; text-align: left; margin-bottom: 4px; font-size: 12px; }

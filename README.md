@@ -34,5 +34,9 @@ Free Chrome extension (Manifest V3) that checks where a business ranks in local 
 ## Notes
 - If a CAPTCHA or consent page appears, the scan pauses; solve it in the scan window and click **Resume**.
 - Keep delays at 3 s or more and use the tool responsibly. Results come from public search pages and may differ from what a user sees on their own device.
+- Not affiliated with or endorsed by Google. Google and Google Maps are trademarks of Google LLC.
 - Page-reading selectors live in `js/scraper.js`; update them there if the page markup changes.
 - `js/grid.js` holds the pure logic (grid math, parsing, matching, metrics, CSV).
+
+## Branding
+- A "Try GMB Briefcase" banner appears after every completed scan and a "Powered by" footer is always shown. Brand text and links live in `js/config.js`.

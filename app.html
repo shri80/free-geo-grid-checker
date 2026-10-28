@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Free Geo Grid Tracker</title>
+  <title>Free Geo Grid Checker</title>
   <link rel="stylesheet" href="lib/leaflet.css">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
   <header class="topbar">
-    <h1>Free Geo Grid Tracker <small class="by">by <a data-brand-link href="#" target="_blank" rel="noreferrer"><span data-brand-name></span></a></small></h1>
+    <h1>Free Geo Grid Checker <small class="by">by <a data-brand-link href="#" target="_blank" rel="noreferrer"><span data-brand-name></span></a></small></h1>
     <nav>
       <button class="tab active" data-view="scan">New scan</button>
       <button class="tab" data-view="history">History</button>
@@ -19,7 +19,9 @@
   <main id="view-scan" class="layout">
     <section class="panel config">
       <section class="step">
-        <h3><span class="num">1</span>What do you want to rank for?</h3>
+        <h3><span class="num">1</span>What do you want to rank for?
+          <button id="clearAll" type="button" class="clear-btn" title="Clear all inputs and results">✕ Clear</button>
+        </h3>
         <label>Keyword
           <input id="keyword" placeholder="e.g. website designer">
         </label>
@@ -170,32 +172,6 @@
 
   <footer class="foot">Powered by <a data-brand-link href="#" target="_blank" rel="noreferrer"><span data-brand-name></span></a></footer>
 
-  <div id="leadModal" class="modal" hidden>
-    <form id="leadForm" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadTitle" novalidate>
-      <h2 id="leadTitle"></h2>
-      <p id="leadText" class="hint"></p>
-      <label>Email
-        <input id="leadEmail" type="email" autocomplete="email" placeholder="you@agency.com">
-      </label>
-      <div class="row">
-        <label>Name <span class="opt">(optional)</span>
-          <input id="leadName" autocomplete="name">
-        </label>
-        <label>Website <span class="opt">(optional)</span>
-          <input id="leadWebsite" placeholder="youragency.com">
-        </label>
-      </div>
-      <input id="leadHp" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label class="check"><input type="checkbox" id="leadConsent">
-        <span>I agree to receive emails from <span data-brand-name></span> and accept the <a id="leadPrivacy" href="#" target="_blank" rel="noreferrer">privacy policy</a>.</span>
-      </label>
-      <div id="leadErr" class="note err"></div>
-      <div class="row">
-        <button id="leadSubmit" type="submit" class="primary">Submit</button>
-        <button id="leadSkip" type="button">Maybe later</button>
-      </div>
-    </form>
-  </div>
 
   <script src="lib/leaflet.js"></script>
   <script type="module" src="js/app.js"></script>
